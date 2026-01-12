@@ -1,13 +1,16 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken';
 
-export const auth = (req, res, next) => {
-  const token = req.cookies?.token;
-  if (!token) return res.status(401).json({ msg: "Unauthorized" });
-
+export const auth = async (req, res, next) => {
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
-  } catch {
-    res.status(401).json({ msg: "Invalid token" });
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
   }
 };

@@ -1,21 +1,14 @@
-import express from "express";
-import Gig from "../models/Gig.js";
-import { auth } from "../middleware/auth.js";
-
+import express from 'express';
 const router = express.Router();
+import { getGigs, getGig, createGig, getMyGigs, deleteGig} from '../controllers/gigController.js';
+import { auth } from '../middleware/auth.js';
+import { validateGig, checkValidation } from '../middleware/validate.js';
 
-router.get("/", async (req, res) => {
-  const { q } = req.query;
-  const gigs = await Gig.find({
-    status: "open",
-    title: new RegExp(q, "i")
-  });
-  res.json(gigs);
-});
+router.get('/', getGigs);
+router.get('/:id', getGig);
 
-router.post("/", auth, async (req, res) => {
-  const gig = await Gig.create({ ...req.body, ownerId: req.user.id });
-  res.json(gig);
-});
+router.post('/', auth, validateGig, checkValidation, createGig);
+router.get('/user/my-gigs', auth, getMyGigs);
+router.delete('/:id', auth, deleteGig);
 
 export default router;

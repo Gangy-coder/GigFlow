@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:proxy": "VITE_USE_PROXY=true vite",
+    "dev:direct": "vite"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.11.2",
@@ -19,7 +21,10 @@
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.12.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "socket.io-client": "^4.7.5",      
+    "react-hot-toast": "^2.5.0",       
+    "date-fns": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

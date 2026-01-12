@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "../api";
+import api from "../services/api";
 import { useDispatch, useSelector } from "react-redux";
 import { getBids, createBid, hireBid } from "../features/bidSlice";
 
@@ -40,7 +40,7 @@ export default function GigDetails() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        
+
         {/* Gig Header */}
         <div className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300">
           <div className="flex items-start gap-6 mb-6">
@@ -62,14 +62,14 @@ export default function GigDetails() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          
+
           {/* Place Bid Section */}
           <div className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-8 shadow-xl hover:shadow-xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-3 h-3 bg-gradient-to-r from-emerald-500 to-blue-600 rounded-full"></div>
               <h3 className="text-xl font-medium text-slate-900">Place Your Bid</h3>
             </div>
-            
+
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-3">Proposal Message</label>
@@ -80,7 +80,7 @@ export default function GigDetails() {
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-3">Your Price</label>
                 <input
@@ -91,7 +91,7 @@ export default function GigDetails() {
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                 />
               </div>
-              
+
               <button
                 onClick={submitBid}
                 className="group w-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white py-4 px-6 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl hover:from-emerald-700 hover:to-blue-700 focus:ring-4 focus:ring-emerald-500/50 transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
@@ -109,7 +109,7 @@ export default function GigDetails() {
             <h3 className="text-2xl font-light bg-gradient-to-r from-slate-900 to-blue-900 bg-clip-text mb-6 flex items-center gap-3">
               Received Bids ({bids?.length || 0})
             </h3>
-            
+
             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
               {bids?.map((b) => (
                 <div key={b._id} className="group bg-white/80 backdrop-blur-sm border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-lg hover:border-blue-200/80 hover:-translate-y-1 transition-all duration-300 hover:bg-white">
@@ -122,16 +122,15 @@ export default function GigDetails() {
                         <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text">
                           ₹{b.price}
                         </span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          b.status === 'hired' 
-                            ? 'bg-emerald-100 text-emerald-800' 
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${b.status === 'hired'
+                            ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-slate-100 text-slate-700'
-                        }`}>
+                          }`}>
                           {b.status}
                         </span>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={() => hire(b._id)}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 focus:ring-4 focus:ring-green-500/50 transform hover:-translate-y-0.5 transition-all duration-200 whitespace-nowrap flex-shrink-0 ml-4"
@@ -142,7 +141,7 @@ export default function GigDetails() {
                   </div>
                 </div>
               ))}
-              
+
               {(!bids || bids.length === 0) && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">

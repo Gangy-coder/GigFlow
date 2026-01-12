@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api";
+import api from "../services/api";
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
@@ -16,7 +16,7 @@ export default function Dashboard() {
 
         for (const gig of myGigs) {
           const res = await api.get(`/bids/${gig._id}`);
-          bids.push(...res.data.map(b => ({...b, gigTitle: gig.title})));
+          bids.push(...res.data.map(b => ({ ...b, gigTitle: gig.title })));
         }
 
         setData(bids);
@@ -117,9 +117,8 @@ export default function Dashboard() {
                           ₹{parseFloat(b.price || 0).toLocaleString()}
                         </span>
                         {b.status && (
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            b.status === 'hired' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
-                          }`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${b.status === 'hired' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+                            }`}>
                             {b.status}
                           </span>
                         )}
