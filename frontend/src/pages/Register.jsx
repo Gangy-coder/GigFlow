@@ -1,11 +1,15 @@
- 
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { registerUser } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-  const [data, setData] = useState({ name:"", email:"", password:"" });
+  const [data, setData] = useState({ 
+    name: "", 
+    email: "", 
+    password: "",
+    role: "freelancer"
+  });
   const dispatch = useDispatch();
   const nav = useNavigate();
 
@@ -67,6 +71,55 @@ export default function Register() {
               />
             </div>
 
+            {/* FIXED: Perfectly Equal Sized Buttons */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-4">Account Type</label>
+              <div className="flex gap-3">
+                {/* Freelancer - Perfect */}
+                <label className="flex-1 relative group cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="freelancer"
+                    checked={data.role === "freelancer"}
+                    onChange={(e) => setData({ ...data, role: e.target.value })}
+                    className="sr-only peer"
+                    required
+                  />
+                  <div className="w-full p-3 bg-slate-50/50 border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md peer-checked:bg-blue-50 peer-checked:border-blue-400 peer-checked:shadow-blue-200/50 transition-all duration-200 text-left flex items-center gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 border-2 border-blue-400 rounded-full peer-checked:bg-blue-600 peer-checked:border-white">
+                      <div className="w-2.5 h-2.5 bg-blue-600 rounded-full mx-auto mt-0.5 opacity-0 peer-checked:opacity-100 transition-opacity duration-200 absolute inset-0 m-1" />
+                    </div>
+                    <div>
+                      <span className="font-semibold text-sm text-slate-900 group-hover:text-blue-600 peer-checked:text-blue-600">Freelancer</span>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">Find and bid on gigs</p>
+                    </div>
+                  </div>
+                </label>
+
+                {/* FIXED: Employer - Now Perfect Match */}
+                <label className="flex-1 relative group cursor-pointer">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="employer"
+                    checked={data.role === "employer"}
+                    onChange={(e) => setData({ ...data, role: e.target.value })}
+                    className="sr-only peer"
+                  />
+                  <div className="ww-full p-3 bg-slate-50/50 border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md peer-checked:bg-blue-50 peer-checked:border-blue-400 peer-checked:shadow-blue-200/50 transition-all duration-200 text-left flex items-center gap-3">
+                    <div className="flex-shrink-0 w-5 h-5 border-2 border-emerald-400 rounded-full peer-checked:bg-emerald-600 peer-checked:border-white">
+                      <div className="w-2.5 h-2.5 bg-emerald-600 rounded-full mx-auto mt-0.5 opacity-0 peer-checked:opacity-100 transition-opacity duration-200 absolute inset-0 m-1" />
+                    </div>
+                    <div className="truncate">
+                      <span className="font-semibold text-sm text-slate-900 group-hover:text-emerald-600 peer-checked:text-emerald-600">Employer</span>
+                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">Post gigs and hire talent</p>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <button
               type="submit"
               className="group w-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white py-3 px-4 rounded-xl font-medium text-sm shadow-lg hover:shadow-xl hover:from-emerald-700 hover:to-blue-700 focus:ring-4 focus:ring-emerald-500/50 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-2"
@@ -78,14 +131,12 @@ export default function Register() {
             </button>
           </div>
 
-          {/* FIXED: Login Link with User Icon + Clear Hover */}
           <div className="pt-6 border-t border-slate-200/50 text-center">
             <p className="text-sm text-slate-600">
               Already have an account?{" "}
               <button 
                 onClick={() => nav("/login")} 
                 className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50/50 px-2 py-1 rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/50 group"
-                title="Go to Login page"
               >
                 <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
