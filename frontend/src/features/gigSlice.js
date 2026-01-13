@@ -5,7 +5,7 @@ export const getGigs = createAsyncThunk(
   "gigs/get",
   async (query = "", { rejectWithValue }) => {
     try {
-      // CORRECT ENDPOINT: Add /api/ prefix
+    
       const res = await api.get(`/api/gigs?search=${query}`);
       return res.data;
     } catch (error) {

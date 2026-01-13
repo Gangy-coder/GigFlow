@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCurrentUser } from './features/authSlice';
 
 // Import all components
 import Navbar from './components/Navbar';
@@ -15,22 +17,31 @@ import GigDetails from './pages/GigDetails';
 import Profile from './pages/Profile';
 import MyGigs from './pages/MyGigs';
 import MyBids from './pages/MyBids';
-import Gigs from './pages/Gigs';           
-import About from './pages/About';         
-import Notifications from './pages/Notifications'; 
+import About from './pages/About'; // ADD THIS IMPORT
 
 function App() {
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+
+  // Check if user is logged in ONLY if we think we're authenticated
+  useEffect(() => {
+    // Only try to get current user if we have a user in localStorage
+    const userFromStorage = localStorage.getItem('user');
+    if (userFromStorage) {
+      dispatch(getCurrentUser());
+    }
+  }, [dispatch]);
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50"> {/* Updated background to match your theme */}
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
+      <main>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} /> {/* ADD THIS ROUTE */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/gigs" element={<Gigs />} />
-          <Route path="/about" element={<About />} />
           
           {/* Protected Routes */}
           <Route path="/dashboard" element={
@@ -66,12 +77,6 @@ function App() {
           <Route path="/my-bids" element={
             <ProtectedRoute>
               <MyBids />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/notifications" element={
-            <ProtectedRoute>
-              <Notifications />
             </ProtectedRoute>
           } />
         </Routes>

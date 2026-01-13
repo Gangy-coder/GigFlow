@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { getCurrentUser } from '../features/authSlice';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, isLoading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const { user, isAuthenticated, isLoading } = useSelector((state) => state.auth);
+
+  // Try to get user if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      dispatch(getCurrentUser());
+    }
+  }, [isAuthenticated, isLoading, dispatch]);
 
   if (isLoading) {
     return (
@@ -13,7 +22,7 @@ const ProtectedRoute = ({ children }) => {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" />;
   }
 

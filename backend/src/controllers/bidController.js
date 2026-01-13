@@ -76,57 +76,52 @@ export const getMyBids = async (req, res) => {
 };
 
 export const hireFreelancer = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
+    console.log('Hiring freelancer for bid:', req.params.bidId);
+    
     const { bidId } = req.params;
     
-    const bid = await Bid.findById(bidId).session(session);
+    // Find bid
+    const bid = await Bid.findById(bidId);
     if (!bid) {
-      await session.abortTransaction();
       return res.status(404).json({ error: 'Bid not found' });
     }
 
-    const gig = await Gig.findById(bid.gigId).session(session);
+    // Find gig
+    const gig = await Gig.findById(bid.gigId);
     if (!gig) {
-      await session.abortTransaction();
       return res.status(404).json({ error: 'Gig not found' });
     }
 
+    // Check ownership
     if (gig.ownerId.toString() !== req.user.id) {
-      await session.abortTransaction();
       return res.status(403).json({ error: 'Not authorized' });
     }
 
+    // Check gig status
     if (gig.status === 'assigned') {
-      await session.abortTransaction();
       return res.status(400).json({ error: 'Gig already assigned' });
     }
 
+    // Update in sequence (not atomic, but works)
     gig.status = 'assigned';
-    await gig.save({ session });
+    await gig.save();
 
+    // Reject other bids
     await Bid.updateMany(
       { 
         gigId: gig._id,
         _id: { $ne: bidId }
       },
-      { status: 'rejected' },
-      { session }
+      { status: 'rejected' }
     );
 
+    // Hire selected bid
     bid.status = 'hired';
-    await bid.save({ session });
+    await bid.save();
 
-    await session.commitTransaction();
-    
-    if (req.io) {
-      req.io.to(bid.freelancerId.toString()).emit('hired', {
-        gigTitle: gig.title,
-        message: `You have been hired for "${gig.title}"!`
-      });
-    }
+    // Populate data
+    await bid.populate('freelancerId', 'name email');
 
     res.json({ 
       success: true, 
@@ -136,9 +131,10 @@ export const hireFreelancer = async (req, res) => {
     });
 
   } catch (error) {
-    await session.abortTransaction();
-    res.status(500).json({ error: error.message });
-  } finally {
-    session.endSession();
+    console.error('Hire error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
