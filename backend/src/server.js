@@ -8,6 +8,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import gigRoutes from './routes/gigs.js';
 import bidRoutes from './routes/bids.js';
+import roleRoutes from './routes/roleRoutes.js';
 
 
 const app = express();
@@ -28,6 +29,7 @@ app.get('/api/test', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/gigs', gigRoutes);
 app.use('/api/bids', bidRoutes);
+app.use('/api/roles', roleRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -18,6 +18,16 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['employer', 'freelancer'],
     default: 'freelancer'
+  },
+  availableRoles: {
+    type: [String],
+    default: ['freelancer', 'employer'], // Everyone gets both roles by default
+    enum: ['freelancer', 'employer']
+  },
+  currentRole: {
+    type: String,
+    enum: ['employer', 'freelancer'],
+    default: 'freelancer'
   }
 }, { 
   timestamps: true 

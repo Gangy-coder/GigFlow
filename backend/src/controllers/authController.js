@@ -17,11 +17,20 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || 'freelancer' // Default to freelancer
+      // Legacy field for backward compatibility
+      role: role || 'freelancer',
+      // New fields for role switching
+      availableRoles: ['freelancer', 'employer'], // Everyone gets both roles
+      currentRole: role || 'freelancer' // Start with chosen role or freelancer
     });
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.currentRole, // Use currentRole in token
+        availableRoles: user.availableRoles 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -39,7 +48,8 @@ export const register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.currentRole, // Return currentRole
+        availableRoles: user.availableRoles
       }
     });
   } catch (error) {
@@ -62,7 +72,12 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { 
+        id: user._id, 
+        email: user.email, 
+        role: user.currentRole, // Use currentRole in token
+        availableRoles: user.availableRoles 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -80,7 +95,8 @@ export const login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.currentRole, // Return currentRole
+        availableRoles: user.availableRoles
       }
     });
   } catch (error) {
@@ -108,7 +124,24 @@ export const logout = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
-    res.json({ success: true, user });
+    
+    // If user is from old system, add default availableRoles
+    if (!user.availableRoles) {
+      user.availableRoles = ['freelancer', 'employer'];
+      user.currentRole = user.role || 'freelancer';
+      await user.save();
+    }
+    
+    res.json({ 
+      success: true, 
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.currentRole || user.role, // Return currentRole, fallback to legacy role
+        availableRoles: user.availableRoles || ['freelancer', 'employer']
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

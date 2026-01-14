@@ -11,6 +11,22 @@ const loadUserFromStorage = () => {
   }
 };
 
+//  Role switching thunk
+export const switchUserRole = createAsyncThunk(
+  "auth/switchRole",
+  async (role, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/api/roles/switch", { role });
+      
+      // Save updated user to localStorage
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      return res.data.user;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || "Failed to switch role");
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   "auth/login",
   async (data, { rejectWithValue }) => {
@@ -89,23 +105,45 @@ const authSlice = createSlice({
     user: loadUserFromStorage(),
     loading: false,
     error: null,
-    isAuthenticated: false, // Start as false
-    isInitialized: false // Track if we've tried to get user
+    isAuthenticated: false,
+    isInitialized: false
   },
   reducers: {
     clearError: (state) => {
       state.error = null;
     },
-    // Manual logout without API call
     manualLogout: (state) => {
       state.user = null;
       state.isAuthenticated = false;
       localStorage.removeItem('user');
       sessionStorage.clear();
+    },
+    // Manual role update (for quick testing)
+    updateUserRole: (state, action) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+        localStorage.setItem('user', JSON.stringify(state.user));
+      }
     }
   },
   extraReducers: (builder) => {
     builder
+      // Role Switching 
+      .addCase(switchUserRole.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(switchUserRole.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(switchUserRole.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
@@ -181,5 +219,6 @@ const authSlice = createSlice({
   }
 });
 
-export const { clearError, manualLogout } = authSlice.actions;
+
+export const { clearError, manualLogout, updateUserRole } = authSlice.actions;
 export default authSlice.reducer;

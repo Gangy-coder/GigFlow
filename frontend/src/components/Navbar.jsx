@@ -1,10 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect, useRef } from "react";
-import { logout } from "../features/authSlice"; // Make sure this import exists
+import { logout } from "../features/authSlice";
+import { switchUserRole } from "../features/authSlice"; // ADD THIS IMPORT
 
 export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [switchingRole, setSwitchingRole] = useState(false); // ADD STATE FOR ROLE SWITCHING
   const dropdownRef = useRef(null);
   const dispatch = useDispatch();
 
@@ -39,6 +41,24 @@ export default function Navbar() {
     }
   };
 
+  // ADD THIS FUNCTION: Handle role switching
+  const handleRoleSwitch = async (newRole) => {
+    if (switchingRole || role === newRole) return;
+    
+    try {
+      setSwitchingRole(true);
+      await dispatch(switchUserRole(newRole)).unwrap();
+      setDropdownOpen(false);
+      alert(`Switched to ${newRole} mode!`);
+      window.location.reload(); // Reload to update UI with new role
+    } catch (error) {
+      console.error('Role switch failed:', error);
+      alert('Failed to switch role. Please try again.');
+    } finally {
+      setSwitchingRole(false);
+    }
+  };
+
   return (
     <nav className="backdrop-blur-xl bg-white/90 border-b border-slate-200/70 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
@@ -58,7 +78,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-2 lg:gap-6">
-          {/* ABOUT LINK - ADDED HERE */}
+          {/* ABOUT LINK - KEEP THIS IN MAIN NAV */}
           <Link
             to="/about"
             className="px-5 py-2.5 text-sm font-semibold text-slate-800 hover:text-blue-600 hover:bg-blue-50/80 rounded-2xl transition-all duration-300 flex items-center gap-2 shadow-sm hover:shadow-md group"
@@ -201,19 +221,34 @@ export default function Navbar() {
                       </Link>
                     </div>
 
-                    {/* Navigation Links */}
+                    {/* Navigation Links - REPLACED ABOUT WITH ROLE SWITCHING */}
                     <div className="px-3 py-2">
-                      {/* ABOUT LINK IN DROPDOWN - ADDED */}
-                      <Link
-                        to="/about"
-                        className="block px-5 py-3 text-slate-800 hover:bg-blue-50/80 hover:text-blue-600 rounded-xl transition-all duration-200 flex items-center gap-3 shadow-sm hover:shadow-md"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        About GigFlow
-                      </Link>
+                      {/* ROLE SWITCHING SECTION - REPLACED ABOUT */}
+                      <div className="mb-3">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">Switch Mode</p>
+                        <div className="flex gap-2 px-2 mb-2">
+                          <button
+                            onClick={() => handleRoleSwitch('freelancer')}
+                            disabled={switchingRole || role === 'freelancer'}
+                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${role === 'freelancer'
+                                ? 'bg-purple-500 text-white shadow-sm'
+                                : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                              } ${switchingRole ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {role === 'freelancer' ? '✓ Freelancer' : 'Switch to Freelancer'}
+                          </button>
+                          <button
+                            onClick={() => handleRoleSwitch('employer')}
+                            disabled={switchingRole || role === 'employer'}
+                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${role === 'employer'
+                                ? 'bg-emerald-500 text-white shadow-sm'
+                                : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                              } ${switchingRole ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            {role === 'employer' ? '✓ Employer' : 'Switch to Employer'}
+                          </button>
+                        </div>
+                      </div>
 
                       {role === 'employer' && (
                         <Link
@@ -298,7 +333,7 @@ export default function Navbar() {
       {/* Mobile Menu */}
       <div className="md:hidden bg-white/95 backdrop-blur-sm border-t border-slate-200/50 px-6 py-4">
         <div className="space-y-2">
-          {/* ABOUT LINK FOR MOBILE - ADDED */}
+          {/* ABOUT LINK FOR MOBILE - KEEP THIS */}
           <Link
             to="/about"
             className="block px-4 py-3 text-slate-800 hover:bg-blue-50/80 hover:text-blue-600 rounded-xl transition-all duration-200 flex items-center gap-3"
@@ -308,6 +343,35 @@ export default function Navbar() {
             </svg>
             About
           </Link>
+
+          {/* ADD ROLE SWITCHING TO MOBILE MENU TOO */}
+          {user && (
+            <div className="px-4 py-3">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Switch Mode</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleRoleSwitch('freelancer')}
+                  disabled={switchingRole || role === 'freelancer'}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${role === 'freelancer'
+                      ? 'bg-purple-500 text-white shadow-sm'
+                      : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                    } ${switchingRole ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {role === 'freelancer' ? '✓ Freelancer' : 'Freelancer'}
+                </button>
+                <button
+                  onClick={() => handleRoleSwitch('employer')}
+                  disabled={switchingRole || role === 'employer'}
+                  className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${role === 'employer'
+                      ? 'bg-emerald-500 text-white shadow-sm'
+                      : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                    } ${switchingRole ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {role === 'employer' ? '✓ Employer' : 'Employer'}
+                </button>
+              </div>
+            </div>
+          )}
 
           {user ? (
             <>
