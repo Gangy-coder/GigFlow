@@ -14,9 +14,25 @@ import roleRoutes from './routes/roleRoutes.js';
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+  'https://your-frontend-deployment-url.vercel.app' 
+].filter(Boolean); 
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  exposedHeaders: ['Set-Cookie']
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -47,11 +63,11 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Connect to DB and start server
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}).catch((error) => {
-  console.error('Failed to start server:', error);
-  process.exit(1);
-});
+await connectDB()
+
+if(process.env.NODE_ENV !== "production") {
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+})};
+
+export default app

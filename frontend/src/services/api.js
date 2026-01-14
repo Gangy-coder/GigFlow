@@ -1,12 +1,16 @@
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', // Add /api here
+  baseURL: API_URL, // Use the variable directly
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Rest of your code remains the same...
 
 // Request interceptor - add token if available
 api.interceptors.request.use(
